@@ -830,32 +830,7 @@
         }
         
      // Validate user email via Aircall API - CORRECTED
-async function validateUserEmail(email) {
-    try {
-        // Use the correct endpoint: /v1/users/{email}
-        const response = await fetch(`${baseUrl}users/${encodeURIComponent(email)}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': getAuthHeader(),
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        // If we get 200, user exists
-        if (response.ok) {
-            const data = await response.json();
-            // Verify the email matches
-            return data.user && data.user.email.toLowerCase() === email.toLowerCase();
-        }
-        
-        // If we get 404 or any other error, user doesn't exist
-        return false;
-        
-    } catch (error) {
-        console.error('Error validating user:', error);
-        return false;
-    }
-}
+
         
         // Update logged in user display
         function updateUserDisplay() {
@@ -927,55 +902,26 @@ async function validateUserEmail(email) {
         }
         
         // Initial login (company password + email with API validation)
-        async function initialLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('userEmailInput').value.trim();
-            const password = document.getElementById('initialPasswordInput').value;
-            const errorDiv = document.getElementById('initialLoginError');
-            const loginBtn = document.getElementById('loginBtn');
-            
-            // Disable button and show loading
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Validating...';
-            errorDiv.style.display = 'none';
-            
-            try {
-                // First check password
-                if (password !== CONFIG.companyPassword) {
-                    errorDiv.textContent = 'Invalid company password. Please try again.';
-                    errorDiv.style.display = 'block';
-                    document.getElementById('initialPasswordInput').value = '';
-                    return;
-                }
-                
-                // Then validate email via Aircall API
-                const isValidUser = await validateUserEmail(email);
-                
-                if (!isValidUser) {
-                    errorDiv.textContent = 'This email is not registered in Aircall. Access denied.';
-                    errorDiv.style.display = 'block';
-                    document.getElementById('userEmailInput').value = '';
-                    document.getElementById('initialPasswordInput').value = '';
-                    return;
-                }
-                
-                // Success - user is validated
-                sessionStorage.setItem('bikeleasing_company_auth', 'true');
-                sessionStorage.setItem('bikeleasing_user_email', email);
-                isCompanyAuthenticated = true;
-                currentUserEmail = email;
-                updateUserDisplay();
-                errorDiv.style.display = 'none';
-                showTeamSelector();
-                
-            } catch (error) {
-                errorDiv.textContent = 'Error validating user. Please try again.';
-                errorDiv.style.display = 'block';
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Login';
-            }
-        }
+        function initialLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('userEmailInput').value.trim();
+    const password = document.getElementById('initialPasswordInput').value;
+    const errorDiv = document.getElementById('initialLoginError');
+    
+    if (password === CONFIG.companyPassword) {
+        sessionStorage.setItem('bikeleasing_company_auth', 'true');
+        sessionStorage.setItem('bikeleasing_user_email', email);
+        isCompanyAuthenticated = true;
+        currentUserEmail = email;
+        updateUserDisplay();
+        errorDiv.style.display = 'none';
+        showTeamSelector();
+    } else {
+        errorDiv.textContent = 'Invalid company password. Please try again.';
+        errorDiv.style.display = 'block';
+        document.getElementById('initialPasswordInput').value = '';
+    }
+}
         
         // Team login (team ID password)
         function teamLogin(event) {
