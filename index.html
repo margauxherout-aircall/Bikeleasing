@@ -833,7 +833,7 @@
         async function validateUserEmail(email) {
             try {
                 // Search for user by email
-                const response = await fetch(`${baseUrl}users/search?query=${encodeURIComponent(email)}`, {
+                const response = await fetch(`${baseUrl}users/${encodeURIComponent(email)}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': getAuthHeader(),
